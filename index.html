@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Chinese Painting Sketchpad</title>
+    <style>
+            @font-face {
+    font-family: 'PangMenZhengDao';
+    src: url('fonts/庞门正道粗书体.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'ZhanKuKuaiLe';
+    src: url('fonts/站酷快乐体.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'HuXiaoBoSaoBao';
+    src: url('fonts/胡晓波骚包体.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'ZhongQiZhiMangXing';
+    src: url('fonts/钟齐志莽行书.ttf') format('truetype');
+}
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4ecd8; /* Light yellow background */
+        }
+
+        h1 {
+            font-family: 'Georgia', serif;
+            color: #8b4513; /* SaddleBrown text color */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px solid #8b4513; /* SaddleBrown border for the canvas */
+        }
+
+        .canvas-controls {
+            margin-bottom: 20px;
+        }
+
+        .canvas-controls button {
+            margin: 0 10px;
+            padding: 5px 10px;
+            background-color: #8b4513;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .keywords-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .keywords-container button {
+            margin: 0 10px;
+            padding: 5px 10px;
+            background-color: #8b4513;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .poem-container {
+            font-family: 'Georgia', serif; /* 默认字体 */
+            font-size: 36px; /* 字体大小 */
+            color: #8b4513; /* SaddleBrown text color */
+            text-align: center;
+            position: absolute; /* 使其可以定位 */
+            left: 50%; /* 居中对齐 */
+            top: 50%;
+            transform: translate(-50%, -50%); /* 确保中心对齐 */
+            max-width: 80%; /* 限制最大宽度 */
+        }
+
+        #seal-container {
+            position: absolute;
+            cursor: move;
+        }
+
+        #seal-container img {
+            width: 60px; /* Adjust the size as needed */
+            height: 60px; /* Adjust the size as needed */
+        }
+
+        #knowMore {
+            position: absolute;
+            left: -200px; /* Adjust the left position as needed */
+            top: 10px; /* Adjust the top position as needed */
+            color: #8b4513;
+            text-decoration: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+
+
+        let currentSealIndex = 0;
+
+        function changeSeal() {
+            const seals = [
+                "assets/seals/忘我.jpg",
+                "assets/seals/抱残守缺.jpg",
+                "assets/seals/笔情墨趣.png",
+                "assets/seals/至诚.jpg",
+                "assets/seals/随缘.jpg",
+            ];
+
+            currentSealIndex = (currentSealIndex + 1) % seals.length;
+
+            const selectedSeal = new Image();
+            selectedSeal.src = seals[currentSealIndex];
+
+            selectedSeal.onload = function () {
+                const sealContainer = document.getElementById("seal-container");
+                sealContainer.innerHTML = ""; // Clear previous seal, if any
+                sealContainer.appendChild(selectedSeal);
+
+                // Make the seal image draggable
+                makeElementDraggable(sealContainer);
+            };
+        }
+
+        function showSealInfo() {
+            // Open the seal_info.html in a new tab or window
+            window.open('./seal_info.html', '_blank');
+        }
+
+        function makeElementDraggable(element) {
+            let offsetX, offsetY, isDragging = false;
+
+            element.addEventListener("mousedown", function (e) {
+                isDragging = true;
+                offsetX = e.clientX - element.getBoundingClientRect().left;
+                offsetY = e.clientY - element.getBoundingClientRect().top;
+            });
+
+            document.addEventListener("mousemove", function (e) {
+                if (isDragging) {
+                    const x = e.clientX - offsetX;
+                    const y = e.clientY - offsetY;
+
+                    element.style.left = x + "px";
+                    element.style.top = y + "px";
+                }
+            });
+
+            document.addEventListener("mouseup", function () {
+                isDragging = false;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Make Your Own Chinese Fan!</h1>
+    <div class="font-selector">
+    <label for="font-choice">Choose a Font:</label>
+    <select id="font-choice" onchange="changeFont(this.value)">
+    <option value="PangMenZhengDao">庞门正道粗书体</option>
+    <option value="ZhanKuKuaiLe">站酷快乐体</option>
+    <option value="HuXiaoBoSaoBao">胡晓波骚包体</option>
+    <option value="ZhongQiZhiMangXing">钟齐志莽行书</option>
+</select>
+
+</div>
+
+    <div class="canvas-container">
+        <canvas id="sketchpad" width="600" height="400"></canvas>
+        <a href="#" id="knowMore" onclick="showSealInfo()">Know more about seals</a>
+    </div>
+
+    <div class="canvas-controls">
+        <button onclick="changeImage()">Flower</button>
+        <button onclick="changeSeal()">Seal</button>
+        <button class="eraser-button" onclick="useEraser()">Eraser</button>
+        <button class="clear-button" onclick="clearCanvas()">Clear</button>
+    </div>
+    <div id="seal-container"></div>
+
+    <div class="custom-keyword-container">
+        <input type="text" id="custom-keyword" placeholder="Enter a keyword..." />
+        <button id="generate-poem-btn">Generate Poem</button>
+    </div>
+
+    <div class="poem-container" id="poem-container"></div>
+    <script>
+        const canvas = document.getElementById("sketchpad");
+        const ctx = canvas.getContext("2d");
+        let painting = false;
+        let erasing = false;
+
+        function startPosition(e) {
+            if (erasing) {
+                erase(e);
+            } else {
+                painting = true;
+                draw(e);
+            }
+        }
+
+        function endPosition() {
+            painting = false;
+            erasing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "black";
+
+            if (e.pressure) {
+                ctx.lineWidth = e.pressure * 10; // Adjust the multiplier as needed
+            } else {
+                ctx.lineWidth = 3; // Default width
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+
+            ctx.lineTo(offsetX, offsetY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(offsetX, offsetY);
+        }
+
+        function erase(e) {
+            const rect = canvas.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+
+            ctx.clearRect(offsetX - 5, offsetY - 5, 10, 10);
+        }
+
+        function useEraser() {
+            erasing = true;
+            canvas.style.cursor = "crosshair";
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        canvas.addEventListener("mousedown", startPosition);
+        canvas.addEventListener("mouseup", endPosition);
+        canvas.addEventListener("mousemove", draw);
+
+        document.querySelector(".eraser-button").addEventListener("click", useEraser);
+        document.querySelector(".clear-button").addEventListener("click", clearCanvas);
+
+        function changeImage() {
+            const images = [
+ "assets/flowers/1.png",
+        "assets/flowers/2.png",
+        "assets/flowers/3.png",
+        "assets/flowers/4.png",
+        "assets/flowers/5.png",
+        "assets/flowers/6.png",
+        "assets/flowers/7.png",
+        "assets/flowers/8.png",
+        "assets/flowers/9.png",
+        "assets/flowers/10.png",
+        "assets/flowers/11.png",
+        "assets/flowers/12.png",
+        "assets/flowers/13.png",
+        "assets/flowers/14.png",
+        "assets/flowers/15.png",
+        "assets/flowers/16.png",
+        "assets/flowers/17.png",
+        "assets/flowers/18.png",
+        "assets/flowers/19.png",
+        "assets/flowers/20.png",
+        "assets/flowers/21.png",
+        "assets/flowers/22.png",
+        "assets/flowers/23.png",
+        "assets/flowers/24.png",
+        "assets/flowers/25.png",
+        "assets/flowers/26.png",
+        "assets/flowers/27.png",
+            ];
+
+        const randomIndex = Math.floor(Math.random() * images.length);
+    const selectedImage = new Image();
+    selectedImage.src = images[randomIndex];
+
+    selectedImage.onload = function() {
+        const canvas = document.getElementById('sketchpad');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);  // 清除画布
+        ctx.drawImage(selectedImage, 0, 0, canvas.width, canvas.height);  // 绘制选中的图像
+    };
+}
+
+        makeElementDraggable(document.getElementById("seal-container"));
+
+        document.getElementById("generate-poem-btn").addEventListener("click", function () {
+            const keyword = document.getElementById("custom-keyword").value;
+            if (keyword) {
+                fetchPoem(keyword);
+            } else {
+                alert("Please enter a keyword");
+            }
+        });
+
+        function fetchPoem(keyword) {
+            fetch('http://127.0.0.1:5000/generate-poem?keyword=' + keyword)
+                .then(response => response.json())
+                .then(data => {
+                    displayPoem(data.poem);
+                })
+                .catch(error => console.error('Error fetching poem:', error));
+        }
+
+        function displayPoem(poem) {
+            const poemContainer = document.getElementById('poem-container');
+            poemContainer.innerHTML = poem.join('<br>'); // 使用换行符连接诗句
+        }
+        function changeFont(fontName) {
+    const poemContainer = document.getElementById('poem-container');
+    poemContainer.style.fontFamily = fontName;
+}
+
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Vintage Chinese Painting Sketchpad</title>-->
+<!--  <style>-->
+
+<!--    body {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      height: 100vh;-->
+<!--      margin: 0;-->
+<!--      background-color: #f4ecd8; /* Light yellow background */-->
+<!--    }-->
+<!--    -->
+<!--    h1 {-->
+<!--      font-family: 'Georgia', serif;-->
+<!--      color: #8b4513; /* SaddleBrown text color */-->
+<!--      text-align: center;-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+<!--    -->
+<!--    .canvas-container {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      position: relative;-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+
+<!--    canvas {-->
+<!--      border: 2px solid #8b4513; /* SaddleBrown border for the canvas */-->
+<!--    }-->
+
+<!--    .canvas-controls {-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+
+<!--    .canvas-controls button {-->
+<!--      margin: 0 10px;-->
+<!--      padding: 5px 10px;-->
+<!--      background-color: #8b4513;-->
+<!--      color: #fff;-->
+<!--      border: none;-->
+<!--      cursor: pointer;-->
+<!--      border-radius: 5px;-->
+<!--    }-->
+
+<!--    .keywords-container {-->
+<!--      display: flex;-->
+<!--      justify-content: center;-->
+<!--      margin-bottom: 20px;-->
+<!--    }-->
+
+<!--    .keywords-container button {-->
+<!--      margin: 0 10px;-->
+<!--      padding: 5px 10px;-->
+<!--      background-color: #8b4513;-->
+<!--      color: #fff;-->
+<!--      border: none;-->
+<!--      cursor: pointer;-->
+<!--      border-radius: 5px;-->
+<!--    }-->
+
+<!--    .poem-container {-->
+<!--      font-family: 'Georgia', serif;-->
+<!--      font-size: 16px;-->
+<!--      color: #8b4513; /* SaddleBrown text color */-->
+<!--      text-align: center;-->
+<!--    }-->
+
+<!--    #seal-container {-->
+<!--      position: absolute;-->
+<!--      cursor: move;-->
+<!--    }-->
+
+<!--    #seal-container img {-->
+<!--      width: 60px; /* Adjust the size as needed */-->
+<!--      height: 60px; /* Adjust the size as needed */-->
+<!--    }-->
+
+<!--  #knowMore {-->
+<!--  position: absolute;-->
+<!--  left: -200px; /* Adjust the left position as needed */-->
+<!--  top: 10px; /* Adjust the top position as needed */-->
+<!--  color: #8b4513;-->
+<!--  text-decoration: none;-->
+<!--  cursor: pointer;-->
+<!--  text-decoration: underline;-->
+<!--   }-->
+<!--    -->
+<!--  </style>-->
+<!--  <script>-->
+<!--    let currentSealIndex = 0;-->
+
+
+
+<!--    function changeSeal() {-->
+<!--    const seals = [-->
+<!--      "assets/seals/忘我.jpg",-->
+<!--      "assets/seals/抱残守缺.jpg",-->
+<!--      "assets/seals/笔情墨趣.png",-->
+<!--      "assets/seals/至诚.jpg",-->
+<!--      "assets/seals/随缘.jpg",-->
+<!--    ];-->
+
+<!--currentSealIndex = (currentSealIndex + 1) % seals.length;-->
+
+<!--const selectedSeal = new Image();-->
+<!--selectedSeal.src = seals[currentSealIndex];-->
+
+
+<!--selectedSeal.onload = function () {-->
+<!--  const sealContainer = document.getElementById("seal-container");-->
+<!--  sealContainer.innerHTML = ""; // Clear previous seal, if any-->
+<!--  sealContainer.appendChild(selectedSeal);-->
+
+<!--  // Make the seal image draggable-->
+<!--  makeElementDraggable(sealContainer);-->
+<!--};-->
+<!--}-->
+
+<!--function showSealInfo() {-->
+<!--  // Open the seal_info.html in a new tab or window-->
+<!--  window.open('./seal_info.html', '_blank');-->
+<!--}-->
+
+
+<!--    function makeElementDraggable(element) {-->
+<!--      let offsetX, offsetY, isDragging = false;-->
+
+<!--      element.addEventListener("mousedown", function (e) {-->
+<!--        isDragging = true;-->
+<!--        offsetX = e.clientX - element.getBoundingClientRect().left;-->
+<!--        offsetY = e.clientY - element.getBoundingClientRect().top;-->
+<!--      });-->
+
+<!--      document.addEventListener("mousemove", function (e) {-->
+<!--        if (isDragging) {-->
+<!--          const x = e.clientX - offsetX;-->
+<!--          const y = e.clientY - offsetY;-->
+
+<!--          element.style.left = x + "px";-->
+<!--          element.style.top = y + "px";-->
+<!--        }-->
+<!--      });-->
+
+<!--      document.addEventListener("mouseup", function () {-->
+<!--        isDragging = false;-->
+<!--      });-->
+<!--    }-->
+<!--  </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--  <h1>Make Your Own Chinese Fan!</h1>-->
+
+<!--  <div class="canvas-container">-->
+<!--    <canvas id="sketchpad" width="600" height="400"></canvas>-->
+<!--    <a href="#" id="knowMore" onclick="showSealInfo()">Know more about seals</a>-->
+<!--  </div>-->
+
+<!--  <div class="canvas-controls">-->
+<!--    <button onclick="changeImage()">Flower</button>-->
+<!--    <button onclick="changeSeal()">Seal</button>-->
+<!--    <button class="eraser-button" onclick="useEraser()">Eraser</button>-->
+<!--    <button class="clear-button" onclick="clearCanvas()">Clear</button>-->
+<!--  </div>-->
+<!--  <div id="seal-container"></div>-->
+<!--  &lt;!&ndash; New elements for keywords and poems &ndash;&gt;-->
+
+<!--  <div class="custom-keyword-container">-->
+<!--  <input type="text" id="custom-keyword" placeholder="Enter a keyword..." />-->
+<!--  <button id="generate-poem-btn">Generate Poem</button>-->
+<!--</div>-->
+
+<!--  <div class="poem-container" id="poem-container"></div>-->
+<!--  <script>-->
+<!--    const canvas = document.getElementById("sketchpad");-->
+<!--    const ctx = canvas.getContext("2d");-->
+<!--    let painting = false;-->
+<!--    let erasing = false;-->
+
+<!--    function startPosition(e) {-->
+<!--      if (erasing) {-->
+<!--        erase(e);-->
+<!--      } else {-->
+<!--        painting = true;-->
+<!--        draw(e);-->
+<!--      }-->
+<!--    }-->
+
+<!--    function endPosition() {-->
+<!--      painting = false;-->
+<!--      erasing = false;-->
+<!--      ctx.beginPath();-->
+<!--    }-->
+
+<!--    function draw(e) {-->
+<!--      if (!painting) return;-->
+
+<!--      ctx.lineCap = "round";-->
+<!--      ctx.strokeStyle = "black";-->
+
+<!--      // Check if the event contains pressure information-->
+<!--      if (e.pressure) {-->
+<!--        ctx.lineWidth = e.pressure * 10; // Adjust the multiplier as needed-->
+<!--      } else {-->
+<!--        ctx.lineWidth = 3; // Default width-->
+<!--      }-->
+
+<!--      const rect = canvas.getBoundingClientRect();-->
+<!--      const offsetX = e.clientX - rect.left;-->
+<!--      const offsetY = e.clientY - rect.top;-->
+
+<!--      ctx.lineTo(offsetX, offsetY);-->
+<!--      ctx.stroke();-->
+<!--      ctx.beginPath();-->
+<!--      ctx.moveTo(offsetX, offsetY);-->
+<!--    }-->
+
+<!--    function erase(e) {-->
+<!--      const rect = canvas.getBoundingClientRect();-->
+<!--      const offsetX = e.clientX - rect.left;-->
+<!--      const offsetY = e.clientY - rect.top;-->
+
+<!--      ctx.clearRect(offsetX - 5, offsetY - 5, 10, 10);-->
+<!--    }-->
+
+<!--    function useEraser() {-->
+<!--      erasing = true;-->
+<!--      canvas.style.cursor = "crosshair";-->
+<!--    }-->
+
+<!--    function clearCanvas() {-->
+<!--      ctx.clearRect(0, 0, canvas.width, canvas.height);-->
+<!--    }-->
+
+<!--    canvas.addEventListener("mousedown", startPosition);-->
+<!--    canvas.addEventListener("mouseup", endPosition);-->
+<!--    canvas.addEventListener("mousemove", draw);-->
+
+<!--    // Add event listeners for eraser and clear buttons-->
+<!--    document.querySelector(".eraser-button").addEventListener("click", useEraser);-->
+<!--    document.querySelector(".clear-button").addEventListener("click", clearCanvas);-->
+
+<!--    function changeImage() {-->
+<!--      const images = [-->
+<!--        "assets/flowers/1.png",-->
+<!--        "assets/flowers/2.png",-->
+<!--        "assets/flowers/3.png",-->
+<!--        "assets/flowers/4.png",-->
+<!--        "assets/flowers/5.png",-->
+<!--        "assets/flowers/6.png",-->
+<!--        "assets/flowers/7.png",-->
+<!--        "assets/flowers/8.png",-->
+<!--        "assets/flowers/9.png",-->
+<!--        "assets/flowers/10.png",-->
+<!--        "assets/flowers/11.png",-->
+<!--        "assets/flowers/12.png",-->
+<!--        "assets/flowers/13.png",-->
+<!--        "assets/flowers/14.png",-->
+<!--        "assets/flowers/15.png",-->
+<!--        "assets/flowers/16.png",-->
+<!--        "assets/flowers/17.png",-->
+<!--        "assets/flowers/18.png",-->
+<!--        "assets/flowers/19.png",-->
+<!--        "assets/flowers/20.png",-->
+<!--        "assets/flowers/21.png",-->
+<!--        "assets/flowers/22.png",-->
+<!--        "assets/flowers/23.png",-->
+<!--        "assets/flowers/24.png",-->
+<!--        "assets/flowers/25.png",-->
+<!--        "assets/flowers/26.png",-->
+<!--        "assets/flowers/27.png",-->
+<!--      ];-->
+
+<!--      const randomIndex = Math.floor(Math.random() * images.length);-->
+<!--      const selectedImage = new Image();-->
+<!--      selectedImage.src = images[randomIndex];-->
+
+<!--      selectedImage.onload = function () {-->
+<!--        ctx.drawImage(selectedImage, 0, 0, canvas.width, canvas.height);-->
+<!--      };-->
+<!--    }-->
+<!--  </script>-->
+<!--    <script>-->
+<!--      makeElementDraggable(document.getElementById("seal-container"));-->
+
+<!--      document.getElementById("generate-poem-btn").addEventListener("click", function () {-->
+<!--  const keyword = document.getElementById("custom-keyword").value;-->
+<!--  if (keyword) {-->
+<!--    fetchPoem(keyword);-->
+<!--  } else {-->
+<!--    alert("Please enter a keyword");-->
+<!--  }-->
+<!--});-->
+
+
+<!--    function fetchPoem(keyword) {-->
+<!--      fetch('http://127.0.0.1:5000/generate-poem?keyword=' + keyword)-->
+<!--        .then(response => response.json())-->
+<!--        .then(data => {-->
+<!--          displayPoem(data.poem);-->
+<!--        })-->
+<!--        .catch(error => console.error('Error fetching poem:', error));-->
+<!--    }-->
+
+<!--    function displayPoem(poem) {-->
+<!--    const poemContainer = document.getElementById('poem-container');-->
+<!--    poemContainer.innerHTML = poem.join('<br>');  // 使用换行符连接诗句-->
+<!--}-->
+
+
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
