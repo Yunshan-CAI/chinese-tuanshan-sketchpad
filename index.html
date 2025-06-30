@@ -330,12 +330,24 @@
         });
 
         function fetchPoem(keyword) {
-            fetch('http://127.0.0.1:5000/generate-poem?keyword=' + keyword)
-                .then(response => response.json())
-                .then(data => {
-                    displayPoem(data.poem);
-                })
-                .catch(error => console.error('Error fetching poem:', error));
+            // 预设诗歌库，模拟AI生成
+            const demoPoems = {
+                '春': ['春风得意马蹄疾', '一日看尽长安花', '桃花潭水深千尺', '不及汪伦送我情'],
+                '夏': ['接天莲叶无穷碧', '映日荷花别样红', '小荷才露尖尖角', '早有蜻蜓立上头'],
+                '秋': ['停车坐爱枫林晚', '霜叶红于二月花', '自古逢秋悲寂寥', '我言秋日胜春朝'],
+                '冬': ['千山鸟飞绝', '万径人踪灭', '孤舟蓑笠翁', '独钓寒江雪'],
+                '月': ['明月几时有', '把酒问青天', '不知天上宫阙', '今夕是何年'],
+                '花': ['落红不是无情物', '化作春泥更护花', '花开堪折直须折', '莫待无花空折枝'],
+                '山': ['山重水复疑无路', '柳暗花明又一村', '会当凌绝顶', '一览众山小'],
+                '水': ['黄河之水天上来', '奔流到海不复回', '抽刀断水水更流', '举杯消愁愁更愁']
+            };
+            
+            // 如果没有找到关键词，就随机选择一个
+            const allPoems = Object.values(demoPoems);
+            const randomPoems = allPoems[Math.floor(Math.random() * allPoems.length)];
+            
+            const poem = demoPoems[keyword] || randomPoems;
+            displayPoem(poem);
         }
 
         function displayPoem(poem) {
